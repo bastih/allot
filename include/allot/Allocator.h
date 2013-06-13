@@ -3,6 +3,8 @@
 
 #include <cstddef>
 #include <limits>
+#include <ostream>
+#include <typeinfo>
 
 namespace allot {
 
@@ -25,6 +27,13 @@ class Allocator {
     return std::numeric_limits<std::size_t>::max();
   }
 };
+
+// It's important that PrintTo() is defined in the SAME
+// namespace that defines Bar.  C++'s look-up rules rely on that.
+inline void PrintTo(const Allocator* bar, ::std::ostream* os) {
+  *os << typeid(bar).name();  // whatever needed to print bar to os
+}
+
 
 }
 

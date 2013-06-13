@@ -3,6 +3,8 @@
 
 #include <cstddef>
 
+#include "allot/Allocator.h"
+
 namespace allot {
 
 template <typename T>
@@ -12,10 +14,15 @@ class alloc_adapter {
   typedef std::size_t size_type;
   typedef T value_type;
   typedef T *pointer;
-
+  typedef std::ptrdiff_t difference_type;
+  typedef const T *const_pointer;
+  typedef T& reference;
+  typedef const T& const_reference;
+  
   // Disallow default construction, we always expect to have a backing
   // instance of Allocator at hand.
   alloc_adapter() = delete;
+
   // Explicitly allow implicit conversion from allocator instance
   alloc_adapter(Allocator& alloc) noexcept :
     _alloc(alloc)  {}
@@ -24,7 +31,12 @@ class alloc_adapter {
   alloc_adapter(const alloc_adapter<Other>& other) :
     _alloc(other.getAllocator()) {}
 
-  pointer allocate(const size_type n, void* hint = nullptr) {
+  template<class Other>
+  struct rebind {
+    typedef alloc_adapter<Other> other;
+  };
+  
+  pointer allocate(const size_type n, __attribute__((__unused__)) void* hint = nullptr) {
     return static_cast<pointer>(_alloc.allocate(sizeof(T) * n));
   }
 
@@ -40,6 +52,22 @@ class alloc_adapter {
     return _alloc;
   }
 
+  pointer address(reference val) const throw () {
+    return std::addressof(val);
+  }
+
+  const_pointer address(const_reference val) const throw () {
+    return std::addressof(val);
+  }
+
+  void construct(pointer ptr, const_reference val) {
+    new (ptr) value_type(val);
+  }
+
+  void destroy(pointer ptr) {
+    ptr->~value_type();
+  }
+  
  private:
   Allocator& _alloc;
 };

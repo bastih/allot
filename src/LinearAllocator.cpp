@@ -1,21 +1,21 @@
 #include "allot/LinearAllocator.h"
 
+#include <iostream>
 #include <stdexcept>
 
 namespace allot {
 
 LinearAllocator::LinearAllocator(char* data, std::size_t size)
-      : _data(data), _next_free(data), _end(data + size) {}
+    : _data(data), _next_free(data), _end(data + size) {}
 
 void* LinearAllocator::allocate(std::size_t size) {
-    if (_next_free + size >  _end) {
-      throw std::bad_alloc();
-    }
-    void * result = _next_free;
-    _next_free += size;
-    return result;
+  if (_next_free + size >  _end) {
+    throw std::bad_alloc();
+  }
+  void * result = _next_free;
+  _next_free += size;
+  return result;
 }
-
 
 void LinearAllocator::deallocate(void*, std::size_t) {}
 
