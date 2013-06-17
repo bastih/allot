@@ -1,0 +1,6 @@
+#ifndef ALLOT_CONFIG_H
+#define ALLOT_CONFIG_H
+
+#cmakedefine HWLOC_LIB
+
+#endif

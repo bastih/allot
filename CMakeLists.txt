@@ -1,44 +1,56 @@
 cmake_minimum_required(VERSION 2.8)
-project(allot CXX)
+
+set(CMAKE_DISABLE_SOURCE_CHANGES ON)
+set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
+set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR})
+
+project(allot C CXX)
+
+add_subdirectory(deps/gtest)
+
+set(allot_INCLUDE_DIRS ${allot_SOURCE_DIR}/include ${allot_BINARY_DIR}/include)
+
+find_library(HWLOC NAMES hwloc)
+
+if (NOT HWLOC) 
+   MESSAGE(FATAL_ERROR "could not find hwloc - install libhwloc-dev")
+endif ()
+
+set(LIBS ${HWLOC})
 
 ADD_DEFINITIONS(
     -std=c++11
     -Wall
     -Wextra
     -Wpedantic
-    -g
+    -Werror
+    -g2
 )
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${allot_INCLUDE_DIRS} /usr/local/include)
 
 set(ALLOT_HEADERS
+  include/allot/config.h.in
+  include/allot/config.h
   include/allot/Allocator.h
+  include/allot/LinearAllocator.h
   include/allot/MallocAllocator.h
+  include/allot/NumaNodeAllocator.h
   include/allot/TracingAllocator.h)
 
 add_library(allot STATIC 
+  ${ALLOT_HEADERS}
   src/Allocator.cpp
-  src/MallocAllocator.cpp
   src/LinearAllocator.cpp
-  src/TracingAllocator.cpp
-)
+  src/MallocAllocator.cpp
+  src/NumaNodeAllocator.cpp
+  src/TracingAllocator.cpp)
 
-link_libraries(allot)
-link_libraries(pthread)
-link_libraries(hwloc)
+target_link_libraries(allot ${LIBS})
 
-add_executable(units
-  test/gtest/gtest-all.cpp
-  test/main.cpp
-  test/generic_allocator.cpp
-  test/malloc_allocator.cpp)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/allot/config.h.in 
+               ${CMAKE_CURRENT_BINARY_DIR}/include/allot/config.h @ONLY)
 
-add_custom_target(test)
-macro(run_test test_target)
-  add_custom_target(${test_target}_runtest
-      COMMAND ${test_target} #cmake 2.6 required
-      DEPENDS ${test_target}
-      WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
-  add_dependencies(test ${test_target}_runtest)
-endmacro()
-run_test(units)
+
+add_subdirectory(test)

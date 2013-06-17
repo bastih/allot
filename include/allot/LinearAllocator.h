@@ -13,7 +13,7 @@ class LinearAllocator : public Allocator {
   virtual void deallocate(void*, std::size_t) override;
   virtual std::size_t max_size() const override;
  private:
-  const char* _data;
+  /*const char* _data;*/
   char* _next_free;
   const char* _end;
 };

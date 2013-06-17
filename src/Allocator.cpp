@@ -2,6 +2,6 @@
 
 namespace allot {
 
-Allocator::~Allocator() {}
+Allocator::~Allocator() = default;
 
 }
