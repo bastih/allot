@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+
 
 #include <vector>
 #include <map>
@@ -8,6 +8,7 @@
 #include "allot/LinearAllocator.h"
 #include "allot/NumaNodeAllocator.h"
 #include "allot/TracingAllocator.h"
+#include "gtest/gtest.h"
 
 using ::testing::TestWithParam;
 using ::testing::ValuesIn;
