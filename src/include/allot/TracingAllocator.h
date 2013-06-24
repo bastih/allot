@@ -11,8 +11,11 @@ class TracingAllocator : public Allocator {
   explicit TracingAllocator(Allocator& w);
   virtual void* allocate(std::size_t size) override;
   virtual void deallocate(void* address, std::size_t size) override;
+  void report() const;
  private:
   Allocator& _wrapped;
+  std::size_t _allocated {0};
+  std::size_t _deallocated {0};
 };
 
 }

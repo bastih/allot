@@ -32,15 +32,15 @@ NumaNodeAllocator::NumaNodeAllocator(std::size_t node) :
 void* NumaNodeAllocator::allocate(std::size_t size) {
   const hwloc_topology_t& topo = getTopology();
   if (hwloc_obj_t obj = hwloc_get_obj_by_type(topo, HWLOC_OBJ_NODE, _node)) {
-    void* res = hwloc_alloc_membind_nodeset(topo,
+    void* memory = hwloc_alloc_membind_nodeset(topo,
                                             size,
                                             obj->nodeset,
                                             HWLOC_MEMBIND_BIND,
                                             HWLOC_MEMBIND_NOCPUBIND);
-    if (!res) {
+    if (!memory) {
       throw std::runtime_error(strerror(errno));
     }
-    return res;
+    return memory;
   } else {
     throw std::runtime_error("Could not get numa node");
   }
@@ -54,7 +54,5 @@ void NumaNodeAllocator::deallocate(void* address, std::size_t size) {
 std::size_t NumaNodeAllocator::max_size() const {
   return _size;
 }
-
-   
 
 }
