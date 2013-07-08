@@ -1,17 +1,13 @@
 language: cpp
-env:
-  - compiler='g++-4.7'
-  - compiler='g++-4.8'
-  - compiler='clang++'
+compiler:
+  - clang
+  - gcc
 before_install:
   - git submodule update --init --recursive
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-  - sudo add-apt-repository -y ppa:kxstudio-team/builds
   - sudo apt-get -qq update
   - sudo apt-get install -qq libhwloc-dev
-  - 'if [ "$compiler" = "g++-4.7" ]; then sudo apt-get -qq install g++-4.7 && export CXX=g++-4.7 && export CC=gcc-4.7; fi'
-  - 'if [ "$compiler" = "g++-4.8" ]; then sudo apt-get -qq install g++-4.8 && export CXX=g++-4.8 && export CC=gcc-4.8; fi'
-  - 'if [ "$compiler" = "clang++" ]; then sudo apt-get -qq remove g++-4.6 && sudo apt-get -qq install clang++ && export CXX=clang++ && export CC=clang; fi'
+  - 'if [ "$compiler" = "g++" ]; then sudo apt-get -qq install g++-4.8 && export CXX=g++-4.8 && export CC=gcc-4.8; fi'
 before_script:
   - mkdir build && cd build && cmake ..
 script: make && ./test/units
