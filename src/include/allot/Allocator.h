@@ -8,6 +8,7 @@
 
 namespace allot {
 
+
 /// Allocator base class interface
 class Allocator {
  public:

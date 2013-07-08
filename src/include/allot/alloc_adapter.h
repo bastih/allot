@@ -7,13 +7,15 @@
 
 namespace allot {
 
+template <typename T> class alloc_adapter;
+
 template <typename T>
 class alloc_adapter {
  public:
   typedef T value_type;
   typedef std::size_t size_type; // optional
   typedef T *pointer; // optional
-   
+  
   // Disallow default construction, we always expect to have a backing
   // instance of Allocator at hand.
   alloc_adapter() = delete;
@@ -42,7 +44,7 @@ class alloc_adapter {
     return _alloc;
   }
 
-  /*
+  
   typedef std::ptrdiff_t difference_type;
   typedef const T *const_pointer;
   typedef T& reference;
@@ -68,7 +70,7 @@ class alloc_adapter {
 
   void destroy(pointer ptr) {
     ptr->~value_type();
-    }*/
+  }
  private:
   Allocator& _alloc;
 };

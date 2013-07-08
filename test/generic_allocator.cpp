@@ -9,6 +9,8 @@
 #include "allot/NumaNodeAllocator.h"
 #include "allot/TracingAllocator.h"
 #include "gtest/gtest.h"
+#include "allot/map.h"
+#include "allot/vector.h"
 
 using ::testing::TestWithParam;
 using ::testing::ValuesIn;
@@ -49,25 +51,15 @@ TEST_P(AllocatorTest, basic_allocation) {
 }
 
 
-template <
-  typename kT,
-  typename vT,
-  typename comp=typename std::map<kT, vT>::key_compare,
-  typename alloc=alloc_adapter<typename std::map<kT, vT>::value_type>
->
-using map = std::map<kT, vT, comp, alloc>;
 
-template <
-  typename vT
->
-using vector = std::vector<vT, alloc_adapter<vT>>;
 
-template <
+
+/*template <
   typename kT,
   typename comp=typename std::set<kT>::key_compare,
   typename alloc=alloc_adapter<typename std::set<kT>::value_type>
 >
-using set = std::set<kT, comp, alloc>;
+using set = std::set<kT, comp, alloc>;*/
 
 
 TEST_P(AllocatorTest, vector) {
@@ -86,10 +78,10 @@ TEST_P(AllocatorTest, map) {
   ASSERT_EQ(mp[0], 10);
   ASSERT_EQ(mp[10], 2);
 }
-
+/*
 TEST_P(AllocatorTest, set) {
   Allocator& alloc = *GetParam();
   set<int> mp(alloc);
   mp.insert(10);
   mp.insert(20);
-}
+  }*/
