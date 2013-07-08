@@ -3,7 +3,7 @@
 #include "allot/config.h"
 
 #include <stdexcept>
-
+#include <iostream>
 #include "hwloc.h"
 
 namespace allot {
@@ -18,12 +18,20 @@ static hwloc_topology_t& getTopology() {
   return topology;
 }
 
+/// Tries to retrieve NumaNode and falls back to retrieving the
+/// current machine.
+inline hwloc_obj_t getNodeOrMachine(const hwloc_topology_t& topo, std::size_t node) {
+  if (auto o = hwloc_get_obj_by_type(topo, HWLOC_OBJ_NODE, node)) { return o; }
+  else if (auto o = hwloc_get_obj_by_type(topo, HWLOC_OBJ_MACHINE, node)) { return o; }
+  else { return nullptr; }
+}
+
 std::size_t getAvailableMemory(std::size_t node) {
   const hwloc_topology_t& topo = getTopology();
-  if (hwloc_obj_t obj = hwloc_get_obj_by_type(topo, HWLOC_OBJ_NODE, node)) {
-    return obj->memory.local_memory;
+  if (auto obj = getNodeOrMachine(topo, node)) {
+     return obj->memory.local_memory;
   }
-  return 0;
+  throw std::runtime_error("No available memory");
 }
 
 NumaNodeAllocator::NumaNodeAllocator(std::size_t node) :
@@ -31,7 +39,7 @@ NumaNodeAllocator::NumaNodeAllocator(std::size_t node) :
 
 void* NumaNodeAllocator::allocate(std::size_t size) {
   const hwloc_topology_t& topo = getTopology();
-  if (hwloc_obj_t obj = hwloc_get_obj_by_type(topo, HWLOC_OBJ_NODE, _node)) {
+  if (auto obj = getNodeOrMachine(topo, _node)) {
     void* memory = hwloc_alloc_membind_nodeset(topo,
                                             size,
                                             obj->nodeset,

@@ -51,28 +51,18 @@ TEST_P(AllocatorTest, basic_allocation) {
 }
 
 
-
-
-
-/*template <
-  typename kT,
-  typename comp=typename std::set<kT>::key_compare,
-  typename alloc=alloc_adapter<typename std::set<kT>::value_type>
->
-using set = std::set<kT, comp, alloc>;*/
-
-
 TEST_P(AllocatorTest, vector) {
   Allocator& alloc = *GetParam();
-  vector<int> vec(alloc);
+  allot::vector<int> vec(alloc);
   vec.push_back(1);
   vec.push_back(2);
   vec.push_back(3);
+  vec.push_back(4);
 }
 
 TEST_P(AllocatorTest, map) {
   Allocator& alloc = *GetParam();
-  map<int, int> mp(alloc);
+  allot::map<int, int> mp(alloc);
   mp[0] = 10;
   mp[10] = 2;
   ASSERT_EQ(mp[0], 10);

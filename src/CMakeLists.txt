@@ -11,7 +11,7 @@ set(allot_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_BINARY_DIR}/include CACHE STRING "allot include dirs")
 
-set(internal_flags "-Wall -Werror -Wpedantic -Werror -g2")
+set(internal_flags "-Wall -Wextra -Werror -pedantic -g2 -ggdb")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${allot_CXX_FLAGS} ${internal_flags}")
 

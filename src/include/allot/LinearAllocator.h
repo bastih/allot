@@ -18,6 +18,10 @@ class LinearAllocator : public Allocator {
   const char* _end;
 };
 
+inline void operator<<(std::ostream& os, LinearAllocator* a)  {
+  os << typeid(a).name();
+}
+
 }
 
 #endif
