@@ -11,7 +11,7 @@ before_install:
   - sudo apt-get install -qq libhwloc-dev
   - 'if [ "$compiler" = "g++-4.7" ]; then sudo apt-get -qq install g++-4.7 && export CXX=g++-4.7 && export CC=gcc-4.7; fi'
   - 'if [ "$compiler" = "g++-4.8" ]; then sudo apt-get -qq install g++-4.8 && export CXX=g++-4.8 && export CC=gcc-4.8; fi'
-  - 'if [ "$compiler" = "clang++" ]; then sudo apt-get -qq install clang++ && export CXX=clang++ && export CC=clang; fi'
+  - 'if [ "$compiler" = "clang++" ]; then sudo apt-get -qq remove g++-4.6 && sudo apt-get -qq install clang++ && export CXX=clang++ && export CC=clang; fi'
 before_script:
   - mkdir build && cd build && cmake ..
 script: make && ./test/units
