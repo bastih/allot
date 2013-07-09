@@ -81,14 +81,14 @@ class Search: public AbstractBenchmark
 
   void benchMallocVector(std::size_t length) {
     allot::MallocAllocator ma;
-    std::vector<int, allot::alloc_adapter<int>> vec(ma);
+    std::vector<int, allot::alloc_adapter<int>> vec(&ma);
     add(vec, length);
   }
 
  void benchMallocTraceVector(std::size_t length) {
     allot::MallocAllocator ma;
-    allot::TracingAllocator la(ma);
-    std::vector<int, allot::alloc_adapter<int>> vec(la);
+    allot::TracingAllocator la(&ma);
+    std::vector<int, allot::alloc_adapter<int>> vec(&la);
     add(vec, length);
   }
   
@@ -96,7 +96,7 @@ class Search: public AbstractBenchmark
     char space[sumOfAllocations(length, sizeof(int))]; // probably a
                                                        // tad too much
     allot::LinearAllocator la(space, sizeof(space));
-    std::vector<int, allot::alloc_adapter<int>> vec(la);
+    std::vector<int, allot::alloc_adapter<int>> vec(&la);
     add(vec, length);
   }
   
