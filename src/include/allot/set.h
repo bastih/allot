@@ -15,8 +15,8 @@ using set = std::set<T, Compare, Allocator>;
 #else
 class set : public std::set<T, Compare, Allocator> {
  public:
-  explicit set(const Allocator& allocator) : std::set(Compare(), allocator) {}
-}
+  explicit set(const Allocator& allocator) : std::set<T, Compare, Allocator>(Compare(), allocator) {}
+};
 #endif // _LIBCPP_VERSION
 
 }

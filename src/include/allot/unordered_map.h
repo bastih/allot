@@ -16,8 +16,9 @@ template<
 using unordered_map = std::unordered_map<Key, T, Hash, KeyEqual, Allocator>; 
 #else
 class unordered_map : public std::unordered_map<Key, T, Hash, KeyEqual, Allocator> {
-  explicit unordered_map(const Allocator& alloc) : std::unordered_map(10, Hash(), KeyEqual(), _alloc) {}
-}
+ public:
+  explicit unordered_map(const Allocator& alloc) : std::unordered_map<Key, T, Hash, KeyEqual, Allocator>(10, Hash(), KeyEqual(), alloc) {}
+};
 #endif
 
 }

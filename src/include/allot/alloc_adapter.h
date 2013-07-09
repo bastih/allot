@@ -70,12 +70,14 @@ class alloc_adapter {
     return std::addressof(val);
   }
 
-  void construct(pointer ptr, const_reference val) {
-    new (ptr) value_type(val);
+  template<class U, class... Args>
+  void construct(U* ptr, Args&&... args) {
+    new (ptr) U(std::forward<Args>(args)...);
   }
 
-  void destroy(pointer ptr) {
-    ptr->~value_type();
+  template<class U>
+  void destroy( U* p ) {
+    p->~U();
   }
  private:
    Allocator * const _alloc;
