@@ -63,4 +63,21 @@ std::size_t NumaNodeAllocator::max_size() const {
   return _size;
 }
 
+
+namespace numa {
+
+void try_bind_close_to_allocator(const Allocator* alloc) {
+  const NumaNodeAllocator* numa_allocator = dynamic_cast<const NumaNodeAllocator*>(alloc);
+  if (!numa_allocator) { return; }
+  std::size_t node = numa_allocator->node();
+  auto topo = getTopology();
+  auto obj = getNodeOrMachine(topo, node);
+  int r = hwloc_set_cpubind(topo, obj->cpuset, HWLOC_CPUBIND_THREAD | HWLOC_CPUBIND_STRICT);
+  if (r == -1) { throw std::runtime_error("binding failed"); }
 }
+
+}
+
+}
+
+

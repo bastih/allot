@@ -11,11 +11,18 @@ class NumaNodeAllocator : public Allocator {
   void * allocate(std::size_t size);
   void deallocate(void* address, std::size_t size);
   std::size_t max_size() const;
+  std::size_t node() const { return _node; }
  private:
   const std::size_t _node;
   const std::size_t _size;
 };
 
+
+namespace numa {
+
+void try_bind_close_to_allocator(const Allocator* alloc);
+
+}
 
 }
 
