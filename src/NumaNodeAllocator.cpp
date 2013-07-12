@@ -22,8 +22,10 @@ static hwloc_topology_t& getTopology() {
 /// current machine.
 inline hwloc_obj_t getNodeOrMachine(const hwloc_topology_t& topo, std::size_t node) {
   if (auto o = hwloc_get_obj_by_type(topo, HWLOC_OBJ_NODE, node)) { return o; }
-  else if (auto o = hwloc_get_obj_by_type(topo, HWLOC_OBJ_MACHINE, node)) { return o; }
-  else { return nullptr; }
+  else if (auto o = hwloc_get_obj_by_type(topo, HWLOC_OBJ_MACHINE, 0)) { return o; }
+  // fallback to the complete machine - if there is no machine, we
+  // should error out.
+  else { throw std::runtime_error("could not find machine"); }
 }
 
 std::size_t getAvailableMemory(std::size_t node) {
@@ -66,14 +68,22 @@ std::size_t NumaNodeAllocator::max_size() const {
 
 namespace numa {
 
-void try_bind_close_to_allocator(const Allocator* alloc) {
-  const NumaNodeAllocator* numa_allocator = dynamic_cast<const NumaNodeAllocator*>(alloc);
-  if (!numa_allocator) { return; }
-  std::size_t node = numa_allocator->node();
+namespace detail {
+
+void bind_to_node(std::size_t node) {
   auto topo = getTopology();
   auto obj = getNodeOrMachine(topo, node);
   int r = hwloc_set_cpubind(topo, obj->cpuset, HWLOC_CPUBIND_THREAD | HWLOC_CPUBIND_STRICT);
   if (r == -1) { throw std::runtime_error("binding failed"); }
+}
+
+}
+
+void try_bind_close_to_allocator(const Allocator* alloc) {
+  const NumaNodeAllocator* numa_allocator = dynamic_cast<const NumaNodeAllocator*>(alloc);
+  if (!numa_allocator) { return; }
+  std::size_t node = numa_allocator->node();
+  detail::bind_to_node(node);
 }
 
 }

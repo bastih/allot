@@ -82,12 +82,12 @@ class NumaBenchmark: public AbstractBenchmark {
    
     setWarmUpRuns(0);
     setMaxRuns(2);
-        
-    addPerformanceCounter("PAPI_TOT_CYC");
+     
+    addPerformanceCounter("walltime");
 
-    addParameter(new Parameter("length", {256, 512, 1024, 2048, 4096, 8192}));
-    addParameter(new Parameter("workload", {WL_sequential /*, WL_random*/}));
-    addParameter(new Parameter("placement", {PL_random, /*PL_core_strict, */ PL_numa_strict/*, PL_numa_different*/}));
+    addParameter(new Parameter("length", {256, 512, 1024, 2048, 4096, 8192, 16384, 32768}));
+    addParameter(new Parameter("workload", {WL_sequential, WL_random}));
+    addParameter(new Parameter("placement", {PL_random, /*PL_core_strict, */ PL_numa_strict, PL_numa_different}));
     addParameter(new Parameter("allocation", {AL_malloc, AL_numa}));
     setSequenceId("length");
         
@@ -132,37 +132,42 @@ class NumaBenchmark: public AbstractBenchmark {
     
   void finishRun(std::map<std::string, int> parameters, int combination, int test_series_id, int run) {}
 
-  static void some_func(std::map<std::string, int>& p, allot::vector<std::uint32_t> const * v, int i) {
-    try {
-      std::size_t found = false;
-      switch (p.at("placement")) {
-        case PL_random: break;
-        case PL_numa_strict: allot::numa::try_bind_close_to_allocator(v->get_allocator().getAllocator()); break;
-        default: throw std::runtime_error("invalid thread placement");
-      }
-      switch (p.at("workload")) {
-        case WL_sequential: {
-          for (const auto& element: *v) {
-            if (element == 10) {
-              found++;
-            }
-          }
-        } break;
-        default: throw std::runtime_error("invalid workload");
-      }
-    } catch (...) {
-      std::cout << "something failed" << std::endl;
+  static void some_func(std::size_t placement, std::size_t workload, allot::vector<std::uint32_t> const * v, int worker, std::size_t num_workers) {
+    std::size_t found = 0;
+    switch (placement) {
+      case PL_random: break;
+      case PL_numa_different: allot::numa::detail::bind_to_node(worker+1 % num_workers); break; 
+      case PL_numa_strict: allot::numa::try_bind_close_to_allocator(v->get_allocator().getAllocator()); break;
+      default: throw std::runtime_error("invalid thread placement");
     }
+    switch (workload) {
+      case WL_sequential: {
+        for (const auto& element: *v) {
+          if (element == 10) {
+            found++;
+          }
+        }
+      } break;
+      case WL_random: {
+        std::random_device rd;
+        std::default_random_engine engine(rd());
+        std::uniform_int_distribution<int> uniform_dist(0, v->size());
+        
+        for (std::size_t i=0, items = v->size(); i < items; ++i) {
+          std::size_t pos = uniform_dist(engine);
+          found += (*v)[pos];
+        }
+      } break;
+      default: throw std::runtime_error("invalid workload");
+    }
+    
   }
-  
   
   void doTheTest(std::map<std::string, int> p, int combination, int test_series_id, int run) {
     std::vector<std::thread> threads;
     for (std::size_t _i=0, e=_worker_threads; _i < e; ++_i) {
       //some_func(p, _work_vectors.at(_i), _i);
-      std::thread t(some_func, std::ref(p), _work_vectors.at(_i), _i);
-      t.join();
-      
+      threads.push_back(std::thread(some_func, p["placement"], p["workload"], _work_vectors.at(_i), _i, _numa_groups));
     }
     for (auto& t: threads) {
       t.join();

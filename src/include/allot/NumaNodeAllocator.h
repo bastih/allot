@@ -21,7 +21,9 @@ class NumaNodeAllocator : public Allocator {
 namespace numa {
 
 void try_bind_close_to_allocator(const Allocator* alloc);
-
+namespace detail {
+void bind_to_node(std::size_t node);
+}
 }
 
 }
