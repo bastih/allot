@@ -42,7 +42,7 @@ class Search: public AbstractBenchmark
 
     Parameter *length = new Parameter("length", {256, 512, 1024, 2048, 4096, 8192});
     setSequenceId("length");
-    addParameter(length);
+    addParameter(std::unique_ptr<Parameter>(length));
         
     addTestSeries(allocator_types::default_vector, "default_vector");
     addTestSeries(allocator_types::malloc_vector, "malloc_vector");

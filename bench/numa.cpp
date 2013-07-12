@@ -71,34 +71,32 @@ enum PLACEMENT {
 
 class NumaBenchmark: public AbstractBenchmark {
  public:
-  std::size_t _length;
-  std::size_t _numa_groups = 2;
-  std::size_t _worker_threads = 2;
-  std::vector<std::thread> _threads;
+  std::size_t _numa_groups = 4;
+  std::size_t _worker_threads = 4;
+
   std::vector<allot::vector<std::uint32_t>* > _work_vectors;
 
   void initialize() {
     setName("Numa");
-   
-    setWarmUpRuns(0);
-    setMaxRuns(2);
-     
+
+    setWarmUpRuns(2);
+    setMaxRuns(10);
+
     addPerformanceCounter("walltime");
 
-    addParameter(new Parameter("length", {256, 512, 1024, 2048, 4096, 8192, 16384, 32768}));
-    addParameter(new Parameter("workload", {WL_sequential, WL_random}));
-    addParameter(new Parameter("placement", {PL_random, /*PL_core_strict, */ PL_numa_strict, PL_numa_different}));
-    addParameter(new Parameter("allocation", {AL_malloc, AL_numa}));
+    addParameter(std::unique_ptr<Parameter>(new Parameter("length", {16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768})));
+    addParameter(std::unique_ptr<Parameter>(new Parameter("workload", {WL_sequential, WL_random})));
+    addParameter(std::unique_ptr<Parameter>(new Parameter("placement", {PL_random, /*PL_core_strict, */ PL_numa_strict, PL_numa_different})));
+    addParameter(std::unique_ptr<Parameter>(new Parameter("allocation", {AL_malloc, AL_numa})));
+
     setSequenceId("length");
-        
+
     addTestSeries(0, "general");
     setAggregatingFunction(AggregationType::Average);
   }
-    
   void prepareStart() {}
-    
   void finalize() {}
-    
+
   void prepareCombination(std::map<std::string, int> p, int combination) {
     for (std::size_t worker = 0; worker < _worker_threads; ++worker) {
       allot::Allocator* allocator;
@@ -114,7 +112,7 @@ class NumaBenchmark: public AbstractBenchmark {
       _work_vectors.push_back(v);
     }
   }
-    
+
   void finishCombination(std::map<std::string, int> parameters, int combination) {
     for (auto& v: _work_vectors) {
       // get our hands on the allocator before we delete vector
@@ -127,10 +125,10 @@ class NumaBenchmark: public AbstractBenchmark {
     }
     _work_vectors.clear();
   }
-    
+
   void prepareRun(std::map<std::string, int> parameters, int combination, int test_series_id, int run) {}
-    
   void finishRun(std::map<std::string, int> parameters, int combination, int test_series_id, int run) {}
+
 
   static void some_func(std::size_t placement, std::size_t workload, allot::vector<std::uint32_t> const * v, int worker, std::size_t num_workers) {
     std::size_t found = 0;
@@ -160,9 +158,8 @@ class NumaBenchmark: public AbstractBenchmark {
       } break;
       default: throw std::runtime_error("invalid workload");
     }
-    
   }
-  
+
   void doTheTest(std::map<std::string, int> p, int combination, int test_series_id, int run) {
     std::vector<std::thread> threads;
     for (std::size_t _i=0, e=_worker_threads; _i < e; ++_i) {
@@ -173,7 +170,7 @@ class NumaBenchmark: public AbstractBenchmark {
       t.join();
     }
   }
-};  
+};
 
 
 MAIN(NumaBenchmark)

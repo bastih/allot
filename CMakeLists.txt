@@ -7,7 +7,7 @@ set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR})
 
 project(allot C CXX)
 
-#set(CMAKE_BUILD_TYPE RELEASE)
+set(CMAKE_BUILD_TYPE RELEASE)
 
 add_subdirectory(deps/gtest)
 add_subdirectory(deps/bencho)
